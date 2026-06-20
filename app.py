@@ -13,6 +13,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# --- CSS TO HIDE STREAMLIT BRANDING & GITHUB ICON ---
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
+.viewerBadge_container__1QSob {display: none;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # -----------------------------------------
 # API CLIENT INITIALIZATION
 # -----------------------------------------
@@ -90,7 +101,7 @@ def call_llama_agent(system_prompt, user_content):
         return None
 
 # -----------------------------------------
-# STREAMLIT UI (The "Generic" Frontend)
+# STREAMLIT UI
 # -----------------------------------------
 st.title("⚡ Multi-Agent Content Intelligence")
 st.markdown("**Dynamically adapts to target creator tone, language, and audience demographics.**")
@@ -108,18 +119,18 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
     if topic_input.strip() == "" or creator_input.strip() == "":
         st.warning("Please enter both a Creator Profile and a Topic to begin.")
     else:
-        with st.status(f"Initializing Engine for '{creator_input}'...", expanded=True) as status:
+        with st.status("Initializing Content Intelligence Engine...", expanded=True) as status:
             
-            # --- THE "WIZARD OF OZ" FAKE LOADER ---
-            st.write("🔍 Connecting to YouTube v3 API...")
+            # --- THE FAKE LOADER (No Explicit Names Shown) ---
+            st.write("🔍 Connecting to Platform APIs...")
             time.sleep(1.2)
-            st.write(f"📺 Locating Channel ID for: **{creator_input}**...")
+            st.write("📺 Locating Target Creator Profiles & Content IDs...")
             time.sleep(1.5)
-            st.write("📥 Fetching recent video transcripts & extracting linguistic markers...")
+            st.write("📥 Fetching recent transcripts & extracting linguistic markers...")
             time.sleep(2.0)
-            st.write("🧠 Analyzing Hinglish ratio and tonal patterns...")
+            st.write("🧠 Analyzing syntax ratio, vocabulary, and tonal patterns...")
             time.sleep(1.8)
-            st.write("✅ Linguistic profile mapped. Booting Agent 1...")
+            st.write("✅ Linguistic profile mapped. Booting Agent Orchestrator...")
             time.sleep(0.5)
 
             # --- REAL AGENT 1 EXECUTION ---
@@ -144,7 +155,7 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
 
                     # --- RENDER RESULTS ---
                     st.divider()
-                    st.subheader(f"📊 Phase 1: Audience Strategy ({creator_input})")
+                    st.subheader("📊 Phase 1: Audience Strategy")
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.info(f"**Core Pain Point:**\n\n{agent_1_output.get('core_pain_point', '')}")
