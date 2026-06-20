@@ -111,9 +111,11 @@ st.subheader("1. Pipeline Configuration")
 col_a, col_b = st.columns(2)
 
 with col_a:
-    creator_input = st.text_input("Target Creator Profile:", placeholder="e.g., Ali Abdaal, IIT-IIM Unfiltered, etc.")
+    # Removed the placeholder completely so it's a blank box
+    creator_input = st.text_input("Target Creator Profile:")
 with col_b:
-    topic_input = st.text_input("Topic / Raw Insight:", placeholder="e.g., Why consulting is a great first job...")
+    # Made the topic placeholder completely generic
+    topic_input = st.text_input("Topic / Raw Insight:", placeholder="Enter raw topic or idea...")
 
 if st.button("Execute Intelligence Pipeline", type="primary"):
     if topic_input.strip() == "" or creator_input.strip() == "":
