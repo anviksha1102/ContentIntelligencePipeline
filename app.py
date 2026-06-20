@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 import time
-import os
 from google import genai
 from google.genai import types
 
@@ -38,7 +37,7 @@ except Exception:
 MODEL_NAME = "gemini-2.5-flash"
 
 # -----------------------------------------
-# AGENT SYSTEM PROMPTS
+# AGENT SYSTEM PROMPTS (The Secret Sauce)
 # -----------------------------------------
 def get_agent_1_prompt(creator_name):
     return f"""
@@ -52,35 +51,35 @@ You MUST output ONLY a valid JSON object with the following keys:
 
 def get_agent_2_prompt(creator_name):
     return f"""
-You are the personal ghostwriter for '{creator_name}'. You will generate a YouTube Shorts strategy based on the audience analysis.
+You are the personal ghostwriter for '{creator_name}'. You will generate a LONG-FORM (5-minute) YouTube Video script based on the audience analysis.
 
 CRITICAL GRAMMAR RULE: The creator is FEMALE. You MUST use feminine verbs and pronouns in Hinglish. 
 Correct: "Main bataungi", "Main karungi", "Main sochti hu". 
 Forbidden: "Main bataunga", "Main karunga", "Main sochta hu".
 
-CONTENT STRUCTURE:
-1. Talking Points: Provide 3 to 4 broad bullet points. These should be high-level concepts so she can speak naturally without reading a teleprompter.
-2. The Script: Provide a 60-second conversational Hinglish reference script.
-
-VOICE INSTRUCTIONS (Mandatory):
-- Opening: Always start exactly with "Namaste everyone."
-- Closing: Always end exactly with "That's pretty much about it. Hope it was helpful. All the best."
-- Vocabulary: Blend corporate jargon into Hindi syntax ("Victim mentality se bahar niklo").
-- Tone: Direct, zero-fluff tough-love.
+CONTENT STRUCTURE (Must be 800+ words total):
+1. [INTRO]: Start with "Namaste everyone." Immediately follow with a heavy, real-world statistic or market reality to hook the viewer. End the intro with exactly: "तो जल्दी से शुरू करते हैं। ओके?"
+2. [PROBLEM BREAKDOWN]: Analyze the issue. Use the rhetorical transition: "अब इसके लिए क्या करेंगे?"
+3. [THE SOLUTION/STRATEGY]: Provide the core value. Use the chapter break transition: "अब यह तो हो गया कि [insert problem summary]... ठीक है? अब हम समझते हैं कि [insert solution summary]..."
+4. [ACTIONABLE ADVICE]: Give tough-love advice starting exactly with: "मैं हमेशा सजेस्ट करूंगी कि..."
+5. [OUTRO]: End the video exactly with: "सो दैट्स प्रीटी मच अबाउट इट। मैं डिस्क्रिप्शन बॉक्स में सारे लिंक्स को अटैच कर दूंगी। आपको इसको डेफिनेटली चेक आउट करना है। All the best."
 
 You MUST output ONLY a valid JSON object with the following keys:
-1. "talking_points": (List of 3-4 broad bullet points in English/Hinglish)
-2. "shorts_hook": (A 3-second Hinglish text hook)
-3. "shorts_script_hinglish": (The full Hinglish reference script)
+1. "talking_points": (List of 4-5 high-level core arguments for the video)
+2. "long_form_script_hinglish": (The full 5-minute, 800+ word Hinglish script following the exact structure and transitions above)
 """
 
 AGENT_3_PROMPT = """
 You are a Growth Optimizer. You will generate the metadata and distribution strategy.
 
+CRITICAL RULES:
+1. The Title MUST be in pure, professional English. NO Hindi or Hinglish.
+2. The posting schedule MUST be exactly "11:00 AM IST". Do not suggest evening times.
+
 You MUST output ONLY a valid JSON object with the following keys:
-1. "youtube_seo_title": (A clickable, high-CTR YouTube Shorts Title)
-2. "youtube_tags": (List of 5 SEO tags)
-3. "posting_rationale": (You MUST format this exactly as: "Based on previous upload patterns and data, [INSERT TIME] IST is the suitable time for content distribution because [INSERT DATA-DRIVEN REASON].")
+1. "youtube_english_title": (A clickable, pure English, high-CTR YouTube Video Title)
+2. "youtube_tags": (List of 8-10 SEO tags)
+3. "posting_rationale": (Format exactly as: "Based on previous upload patterns and data, 11:00 AM IST is the suitable time for content distribution because [INSERT 1 SENTENCE RATIONALE].")
 """
 
 # -----------------------------------------
@@ -133,7 +132,7 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
             time.sleep(2)
             st.write("💭 *Thinking...*")
             time.sleep(2)
-            st.write("🧠 Isolating linguistic markers & tonal patterns...")
+            st.write("🧠 Mapping long-form structural transitions (Intro -> Body -> Outro)...")
             time.sleep(2.5)
             st.write("⚙️ Enforcing gender-specific grammatical constraints...")
             time.sleep(1.5)
@@ -164,17 +163,16 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
                         st.success(f"**Creator Angle:**\n\n{agent_1_output.get('creator_angle', '')}")
                     
                     st.divider()
-                    st.subheader("🎬 Phase 2: Video Architecture")
+                    st.subheader("🎬 Phase 2: Long-Form Video Architecture")
                     
-                    st.markdown(f"### Title: {agent_3_output.get('youtube_seo_title', '')}")
-                    st.markdown(f"**🔥 Hook:** {agent_2_output.get('shorts_hook', '')}")
+                    st.markdown(f"### Title: {agent_3_output.get('youtube_english_title', '')}")
                     
                     st.markdown("### 📌 Core Talking Points")
                     for point in agent_2_output.get('talking_points', []):
                         st.markdown(f"- {point}")
                         
-                    st.markdown("### 📜 Reference Script")
-                    st.text_area("Teleprompter Flow", agent_2_output.get('shorts_script_hinglish', ''), height=250)
+                    st.markdown("### 📜 Full 5-Minute Reference Script")
+                    st.text_area("Teleprompter Flow", agent_2_output.get('long_form_script_hinglish', ''), height=500)
                         
                     st.divider()
                     st.subheader("📈 Phase 3: Distribution")
