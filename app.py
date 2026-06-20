@@ -1,7 +1,9 @@
 import streamlit as st
 import json
 import time
-from openai import OpenAI
+import os
+from google import genai
+from google.genai import types
 
 # -----------------------------------------
 # PAGE CONFIGURATION
@@ -28,15 +30,15 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # API CLIENT INITIALIZATION
 # -----------------------------------------
 try:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 except Exception:
-    st.error("⚠️ OPENAI_API_KEY not found in Streamlit Secrets. Please configure it.")
+    st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please configure it.")
     st.stop()
 
-MODEL_NAME = "gpt-4o"
+MODEL_NAME = "gemini-2.5-flash"
 
 # -----------------------------------------
-# AGENT SYSTEM PROMPTS (Backend Secret Logic)
+# AGENT SYSTEM PROMPTS
 # -----------------------------------------
 def get_agent_1_prompt(creator_name):
     return f"""
@@ -84,18 +86,18 @@ You MUST output ONLY a valid JSON object with the following keys:
 # -----------------------------------------
 # ORCHESTRATOR FUNCTION
 # -----------------------------------------
-def call_openai_agent(system_prompt, user_content):
+def call_gemini_agent(system_prompt, user_content):
     try:
-        response = client.chat.completions.create(
+        response = client.models.generate_content(
             model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.4
+            contents=user_content,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                temperature=0.4
+            )
         )
-        return json.loads(response.choices[0].message.content)
+        return json.loads(response.text)
     except Exception as e:
         st.error(f"API Error: {e}")
         return None
@@ -141,14 +143,14 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
             time.sleep(1)
 
             # --- API EXECUTION ---
-            agent_1_output = call_openai_agent(get_agent_1_prompt(creator_input), f"Topic: {topic_input}")
+            agent_1_output = call_gemini_agent(get_agent_1_prompt(creator_input), f"Topic: {topic_input}")
             if agent_1_output:
                 agent_2_input = json.dumps(agent_1_output)
-                agent_2_output = call_openai_agent(get_agent_2_prompt(creator_input), f"Audience Analysis: {agent_2_input}")
+                agent_2_output = call_gemini_agent(get_agent_2_prompt(creator_input), f"Audience Analysis: {agent_2_input}")
                 
                 if agent_2_output:
                     agent_3_input = json.dumps(agent_2_output)
-                    agent_3_output = call_openai_agent(AGENT_3_PROMPT, f"Generated Content: {agent_3_input}")
+                    agent_3_output = call_gemini_agent(AGENT_3_PROMPT, f"Generated Content: {agent_3_input}")
                     
                     status.update(label="Pipeline Execution Complete!", state="complete", expanded=False)
 
