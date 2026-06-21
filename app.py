@@ -45,17 +45,22 @@ MODEL_NAME = "gemini-3.5-flash"
 def extract_live_transcript(video_url):
     """Attempts to scrape real YouTube captions. Returns None if it fails."""
     try:
-        parsed = urlparse.urlparse(video_url)
-        video_id = urlparse.parse_qs(parsed.query).get('v')
-        if not video_id:
-            video_id = parsed.path.split('/')[-1]
-        elif type(video_id) == list:
-            video_id = video_id[0]
-            
+        # Handle youtu.be shortened URLs
+        if 'youtu.be' in video_url:
+            video_id = video_url.split('youtu.be/')[1].split('?')[0]
+        else:
+            # Handle standard watch?v= URLs
+            parsed = urlparse.urlparse(video_url)
+            video_id = urlparse.parse_qs(parsed.query).get('v')
+            if video_id:
+                video_id = video_id[0]
+            else:
+                video_id = parsed.path.split('/')[-1]
+                
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'hi'])
         raw_text = " ".join([t['text'] for t in transcript_list])
         return raw_text[:15000] # Cap at 15k characters to keep prompt lean
-    except Exception:
+    except Exception as e:
         return None
 
 # -----------------------------------------
