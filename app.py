@@ -10,7 +10,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 # PAGE CONFIGURATION
 # -----------------------------------------
 st.set_page_config(
-    page_title="Content Intelligence Pipeline",
+    page_title="Content Intelligence Pipeline by ARMSB",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
