@@ -148,7 +148,7 @@ def call_gemini_agent(system_prompt, user_content):
 # -----------------------------------------
 # STREAMLIT UI
 # -----------------------------------------
-st.title("⚡ Video Intelligence Pipeline")
+st.title("⚡ Video Intelligence Pipeline by ARMSB")
 st.markdown("**Dynamically adapts to target creator tone, language, and audience demographics.**")
 st.divider()
 
