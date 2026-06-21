@@ -34,7 +34,7 @@ except Exception:
     st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please configure it.")
     st.stop()
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.5-flash"
 
 # -----------------------------------------
 # AGENT SYSTEM PROMPTS (The Secret Sauce)
