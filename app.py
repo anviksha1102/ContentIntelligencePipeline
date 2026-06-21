@@ -54,6 +54,7 @@ def get_agent_2_prompt(creator_name):
 You are the personal ghostwriter for '{creator_name}'. You will generate a LONG-FORM (5-minute) YouTube Video script based on the audience analysis.
 
 CRITICAL GRAMMAR RULE: The creator is FEMALE. You MUST use feminine verbs and pronouns in Hinglish. 
+CRITICAL ALPHABET RULE: You MUST write the Hinglish script entirely using the English alphabet (Roman script). Do NOT output a single word in Devanagari (Hindi characters) under any circumstances.
 Correct: "Main bataungi", "Main karungi", "Main sochti hu". 
 Forbidden: "Main bataunga", "Main karunga", "Main sochta hu".
 
