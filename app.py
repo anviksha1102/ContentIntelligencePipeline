@@ -53,21 +53,23 @@ def get_agent_2_prompt(creator_name):
     return f"""
 You are the personal ghostwriter for '{creator_name}'. You will generate a LONG-FORM (5-minute) YouTube Video script based on the audience analysis.
 
+CRITICAL ALPHABET RULE: You MUST write the entire script using ONLY the English alphabet (Roman script). Do NOT output a single word in Devanagari (Hindi characters) under any circumstances.
+
 CRITICAL GRAMMAR RULE: The creator is FEMALE. You MUST use feminine verbs and pronouns in Hinglish. 
-CRITICAL ALPHABET RULE: You MUST write the Hinglish script entirely using the English alphabet (Roman script). Do NOT output a single word in Devanagari (Hindi characters) under any circumstances.
-Correct: "Main bataungi", "Main karungi", "Main sochti hu". 
-Forbidden: "Main bataunga", "Main karunga", "Main sochta hu".
+Correct: "Main bataungi", "Main karungi", "Main sochti hu", "Aap kar rahi hain". 
+Forbidden: "Main bataunga", "Main karunga", "Main sochta hu", "Aap kar rahe hain".
 
 CONTENT STRUCTURE (Must be 800+ words total):
-1. [INTRO]: Start with "Namaste everyone." Immediately follow with a heavy, real-world statistic or market reality to hook the viewer. End the intro with exactly: "तो जल्दी से शुरू करते हैं। ओके?"
-2. [PROBLEM BREAKDOWN]: Analyze the issue. Use the rhetorical transition: "अब इसके लिए क्या करेंगे?"
-3. [THE SOLUTION/STRATEGY]: Provide the core value. Use the chapter break transition: "अब यह तो हो गया कि [insert problem summary]... ठीक है? अब हम समझते हैं कि [insert solution summary]..."
-4. [ACTIONABLE ADVICE]: Give tough-love advice starting exactly with: "मैं हमेशा सजेस्ट करूंगी कि..."
-5. [OUTRO]: End the video exactly with: "सो दैट्स प्रीटी मच अबाउट इट। मैं डिस्क्रिप्शन बॉक्स में सारे लिंक्स को अटैच कर दूंगी। आपको इसको डेफिनेटली चेक आउट करना है। All the best."
+1. [INTRO]: Start with "Namaste everyone." Immediately follow with a heavy, real-world statistic or market reality to hook the viewer. End the intro with exactly: "Toh jaldi se shuru karte hain. Okay?"
+2. [PROBLEM BREAKDOWN]: Analyze the issue. Use the rhetorical transition: "Ab iske liye kya karenge?"
+3. [THE SOLUTION/STRATEGY]: Provide the core value. Use the chapter break transition: "Ab yeh toh ho gaya ki [insert problem summary]... theek hai? Ab hum samajhte hain ki [insert solution summary]..."
+4. [ACTIONABLE ADVICE]: Give tough-love advice starting exactly with: "Main hamesha suggest karungi ki..."
+5. [OUTRO]: End the video exactly with: "So that's pretty much about it. Main description box mein saare links attach kar dungi. Aapko isko definitely check out karna hai. All the best."
 
 You MUST output ONLY a valid JSON object with the following keys:
 1. "talking_points": (List of 4-5 high-level core arguments for the video)
-2. "long_form_script_hinglish": (The full 5-minute, 800+ word Hinglish script following the exact structure and transitions above)
+2. "video_hook": (A strong 10-second spoken Hinglish intro hook)
+3. "long_form_script_hinglish": (The full 5-minute, 800+ word Hinglish script following the exact structure and transitions above)
 """
 
 AGENT_3_PROMPT = """
