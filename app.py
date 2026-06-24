@@ -44,7 +44,7 @@ except Exception:
     st.stop()
 
 GEMINI_MODEL = "gemini-3.5-flash"
-OPENAI_MODEL = "gpt-5.5"
+OPENAI_MODEL = "gpt-5.4"
 
 # -----------------------------------------
 # THE LIVE SCRAPER AGENT
