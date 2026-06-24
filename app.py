@@ -4,7 +4,7 @@ import time
 import urllib.parse as urlparse
 from google import genai
 from google.genai import types
-from groq import Groq
+from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 
 # -----------------------------------------
@@ -38,15 +38,14 @@ except Exception:
     st.stop()
 
 try:
-    groq_client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except Exception:
-    st.error("⚠️ GROQ_API_KEY missing from Streamlit Secrets.")
+    st.error("⚠️ OPENAI_API_KEY missing from Streamlit Secrets.")
     st.stop()
 
-# NOTE: The developer API string for Google's fastest model is currently 1.5-flash
-# Even if the consumer web UI says "3.5", the backend calls it 1.5.
-GEMINI_MODEL = "gemini-3.1-pro-preview"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+# NOTE: The exact developer API string for Google's Flash model is gemini-1.5-flash
+GEMINI_MODEL = "gemini-3.5-flash"
+OPENAI_MODEL = "gpt-4o"
 
 # -----------------------------------------
 # THE LIVE SCRAPER AGENT
@@ -130,7 +129,7 @@ You MUST output ONLY a valid JSON object with the following keys:
 # HYBRID ORCHESTRATOR FUNCTION 
 # -----------------------------------------
 def call_llm_agent(system_prompt, user_content):
-    # ATTEMPT 1: Primary Engine (Google Gemini)
+    # ATTEMPT 1: Primary Engine (Google Gemini Flash)
     try:
         response = gemini_client.models.generate_content(
             model=GEMINI_MODEL,
@@ -142,29 +141,29 @@ def call_llm_agent(system_prompt, user_content):
             )
         )
         result = json.loads(response.text)
-        result["_engine_used"] = "Google Gemini"
+        result["_engine_used"] = "ARMSB 1.8 CORE"
         return result
         
     except Exception as e:
         error_msg = str(e)
         
-        # If Google is saturated (503/429), hot-swap to Llama
+        # If Google is saturated (503/429), hot-swap to OpenAI GPT-4o
         if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "overloaded" in error_msg.lower():
-            st.toast("⏳ Primary node saturated. Hot-swapping to Llama 70B cluster...", icon="🔄")
+            st.toast("⏳ Primary node saturated. Hot-swapping to OpenAI GPT-4o...", icon="🔄")
             
-            # ATTEMPT 2: Fallback Engine (Llama 70B via Groq)
+            # ATTEMPT 2: Fallback Engine (GPT-4o)
             try:
-                groq_response = groq_client.chat.completions.create(
+                openai_response = openai_client.chat.completions.create(
+                    model=OPENAI_MODEL,
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_content}
                     ],
-                    model=GROQ_MODEL,
                     temperature=0.4,
                     response_format={"type": "json_object"}
                 )
-                result = json.loads(groq_response.choices[0].message.content)
-                result["_engine_used"] = "Llama 3.3 70B"
+                result = json.loads(openai_response.choices[0].message.content)
+                result["_engine_used"] = "ARMSB 0.4 CORE"
                 return result
                 
             except Exception:
