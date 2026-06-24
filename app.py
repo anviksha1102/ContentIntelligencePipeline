@@ -33,10 +33,9 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 try:
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 except Exception:
-    st.error("⚠️ GEMINI_API_KEY not found in Streamlit Secrets. Please configure it.")
+    st.error("⚠️ System Configuration Error: API connection string missing.")
     st.stop()
 
-# Upgraded to the latest stable Google Flash model
 MODEL_NAME = "gemini-3.5-flash"
 
 # -----------------------------------------
@@ -127,10 +126,10 @@ You MUST output ONLY a valid JSON object with the following keys:
 """
 
 # -----------------------------------------
-# ORCHESTRATOR FUNCTION (WITH GEMINI PRO FALLBACK)
+# ORCHESTRATOR FUNCTION (WITH STEALTH FALLBACK)
 # -----------------------------------------
 def call_gemini_agent(system_prompt, user_content):
-    # ATTEMPT 1: Primary Node (Fast & Lean)
+    # ATTEMPT 1: Primary Node
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
@@ -146,12 +145,12 @@ def call_gemini_agent(system_prompt, user_content):
     except Exception as e:
         error_msg = str(e)
         
-        # Catch 503 (Unavailable) or 429 (Rate Limit) errors
+        # Catch 503 (Unavailable) or 429 (Rate Limit) errors quietly
         if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "overloaded" in error_msg.lower():
-            # Silently notify the UI that the Hot-Swap is occurring
-            st.toast("⏳ Flash node overloaded. Hot-swapping to Gemini 2.5 Pro...", icon="🔄")
+            # IN-UNIVERSE UI NOTIFICATION (Hides Google/Gemini names)
+            st.toast("⏳ Primary routing node at capacity. Re-routing to secondary compute cluster...", icon="🔄")
             
-            # ATTEMPT 2: Fallback Node (Heavy Reasoning via Gemini 2.5 Pro)
+            # ATTEMPT 2: Fallback Node 
             try:
                 fallback_response = client.models.generate_content(
                     model="gemini-2.5-pro",
@@ -164,12 +163,13 @@ def call_gemini_agent(system_prompt, user_content):
                 )
                 return json.loads(fallback_response.text)
                 
-            except Exception as fallback_error:
-                st.error(f"CRITICAL: Both Unnao nodes failed. Error: {fallback_error}")
+            except Exception:
+                # STEALTH ERROR: If fallback hits a 429 limit, hide the ugly stack trace
+                st.error("🚨 ARMSB Core: Both primary and secondary compute clusters are currently saturated. Please wait 30 seconds for the queue to clear and try again.")
                 return None
         else:
-            # If it's a completely different error (like a bad API key), print it
-            st.error(f"Core Engine Error: {error_msg}")
+            # For general errors (like bad parsing)
+            st.error("🚨 ARMSB Core: Internal system connection interrupted. Please check configurations.")
             return None
 
 # -----------------------------------------
@@ -235,30 +235,37 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
                     agent_3_input = json.dumps(agent_2_output)
                     agent_3_output = call_gemini_agent(AGENT_3_PROMPT, f"Generated Content: {agent_3_input}")
                     
-                    status.update(label="Pipeline Execution Complete!", state="complete", expanded=False)
-
-                    # --- RENDER RESULTS ---
-                    st.divider()
-                    st.subheader("📊 Phase 1: Core Strategy")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.info(f"**Core Pain Point:**\n\n{agent_1_output.get('core_pain_point', '')}")
-                    with col2:
-                        st.success(f"**Creator Angle:**\n\n{agent_1_output.get('creator_angle', '')}")
-                    
-                    st.divider()
-                    st.subheader("🎬 Phase 2: Long-Form Video Architecture")
-                    
-                    st.markdown(f"### Title: {agent_3_output.get('youtube_english_title', '')}")
-                    
-                    st.markdown("### 📌 Core Talking Points")
-                    for point in agent_2_output.get('talking_points', []):
-                        st.markdown(f"- {point}")
+                    if agent_3_output:
+                        status.update(label="Pipeline Execution Complete!", state="complete", expanded=False)
+    
+                        # --- RENDER RESULTS ---
+                        st.divider()
+                        st.subheader("📊 Phase 1: Core Strategy")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.info(f"**Core Pain Point:**\n\n{agent_1_output.get('core_pain_point', '')}")
+                        with col2:
+                            st.success(f"**Creator Angle:**\n\n{agent_1_output.get('creator_angle', '')}")
                         
-                    st.markdown("### 📜 Full 5-Minute Reference Script")
-                    st.text_area("Teleprompter Flow", agent_2_output.get('long_form_script_hinglish', ''), height=500)
+                        st.divider()
+                        st.subheader("🎬 Phase 2: Long-Form Video Architecture")
                         
-                    st.divider()
-                    st.subheader("📈 Phase 3: Distribution")
-                    st.write(f"**Schedule:** {agent_3_output.get('posting_rationale', '')}")
-                    st.caption(f"**SEO Tags:** {', '.join(agent_3_output.get('youtube_tags', []))}")
+                        st.markdown(f"### Title: {agent_3_output.get('youtube_english_title', '')}")
+                        
+                        st.markdown("### 📌 Core Talking Points")
+                        for point in agent_2_output.get('talking_points', []):
+                            st.markdown(f"- {point}")
+                            
+                        st.markdown("### 📜 Full 5-Minute Reference Script")
+                        st.text_area("Teleprompter Flow", agent_2_output.get('long_form_script_hinglish', ''), height=500)
+                            
+                        st.divider()
+                        st.subheader("📈 Phase 3: Distribution")
+                        st.write(f"**Schedule:** {agent_3_output.get('posting_rationale', '')}")
+                        st.caption(f"**SEO Tags:** {', '.join(agent_3_output.get('youtube_tags', []))}")
+                    else:
+                        status.update(label="Pipeline Execution Interrupted.", state="error", expanded=True)
+                else:
+                    status.update(label="Pipeline Execution Interrupted.", state="error", expanded=True)
+            else:
+                status.update(label="Pipeline Execution Interrupted.", state="error", expanded=True)
