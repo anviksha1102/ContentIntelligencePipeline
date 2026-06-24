@@ -36,7 +36,7 @@ except Exception:
     st.error("⚠️ System Configuration Error: API connection string missing.")
     st.stop()
 
-MODEL_NAME = "gemini-3.5-flash"
+MODEL_NAME = "gemini-3.1-pro"
 
 # -----------------------------------------
 # THE LIVE SCRAPER AGENT (Option C Implementation)
