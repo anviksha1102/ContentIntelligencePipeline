@@ -126,10 +126,9 @@ You MUST output ONLY a valid JSON object with the following keys:
 """
 
 # -----------------------------------------
-# HYBRID ORCHESTRATOR FUNCTION 
+# DIAGNOSTIC ORCHESTRATOR FUNCTION 
 # -----------------------------------------
 def call_llm_agent(system_prompt, user_content):
-    # ATTEMPT 1: Primary Engine (Google Gemini Flash)
     try:
         response = gemini_client.models.generate_content(
             model=GEMINI_MODEL,
@@ -141,11 +140,13 @@ def call_llm_agent(system_prompt, user_content):
             )
         )
         result = json.loads(response.text)
-        result["_engine_used"] = "ARMSB 1.8 CORE"
+        result["_engine_used"] = "Google Gemini"
         return result
         
     except Exception as e:
-        error_msg = str(e)
+        # RIP THE MASK OFF - SHOW THE RAW LOG
+        st.error(f"🚨 RAW GOOGLE API ERROR LOG: {str(e)}")
+        st.stop() # Halts the app immediately so we can read the log
         
         # If Google is saturated (503/429), hot-swap to OpenAI GPT-4o
         if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "overloaded" in error_msg.lower():
