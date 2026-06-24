@@ -34,16 +34,15 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 try:
     gemini_client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 except Exception:
-    st.error("⚠️ GEMINI_API_KEY missing from Streamlit Secrets.")
+    st.error("⚠️ ARMSB CORE: Primary API key missing from Secure Vault.")
     st.stop()
 
 try:
     openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except Exception:
-    st.error("⚠️ OPENAI_API_KEY missing from Streamlit Secrets.")
+    st.error("⚠️ ARMSB CORE: Auxiliary API key missing from Secure Vault.")
     st.stop()
 
-# NOTE: The exact developer API string for Google's Flash model is gemini-1.5-flash
 GEMINI_MODEL = "gemini-3.5-flash"
 OPENAI_MODEL = "gpt-5.5"
 
@@ -126,36 +125,41 @@ You MUST output ONLY a valid JSON object with the following keys:
 """
 
 # -----------------------------------------
-# DIAGNOSTIC ORCHESTRATOR FUNCTION 
+# MASKED DIAGNOSTIC ORCHESTRATOR FUNCTION 
 # -----------------------------------------
 def call_llm_agent(system_prompt, user_content):
-    try:
-        response = gemini_client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=user_content,
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                response_mime_type="application/json",
-                temperature=0.4
-            )
-        )
-        result = json.loads(response.text)
-        result["_engine_used"] = "Google Gemini"
-        return result
-        
-    except Exception as e:
-        # RIP THE MASK OFF - SHOW THE RAW LOG
-        st.error(f"🚨 RAW GOOGLE API ERROR LOG: {str(e)}")
-        st.stop() # Halts the app immediately so we can read the log
-        
-        # If Google is saturated (503/429), hot-swap to OpenAI GPT-4o
-        if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "overloaded" in error_msg.lower():
-            st.toast("⏳ Primary node saturated. Hot-swapping to OpenAI GPT-4o...", icon="🔄")
+    # The Execution Chain
+    chain = [
+        {"engine": "google", "model": GEMINI_MODEL, "name": "ARMSB Logic Node v3.5", "msg": "Initializing..."},
+        {"engine": "google", "model": GEMINI_MODEL, "name": "ARMSB Logic Node v3.5 (Auto-Retry)", "msg": "Network congestion. Retrying primary node..."},
+        {"engine": "google", "model": "gemini-2.5-flash", "name": "ARMSB Logic Node v2.5", "msg": "Re-routing to secondary logic node..."},
+        {"engine": "openai", "model": OPENAI_MODEL, "name": "ARMSB Auxiliary Core 5.5", "msg": "Internal nodes saturated. Engaging external fallback..."}
+    ]
+    
+    for i, step in enumerate(chain):
+        # Trigger stealth toast for retries
+        if i > 0:
+            st.toast(f"⏳ ARMSB Core: {step['msg']}", icon="🔄")
+            time.sleep(2)
             
-            # ATTEMPT 2: Fallback Engine (GPT-4o)
-            try:
+        try:
+            if step["engine"] == "google":
+                response = gemini_client.models.generate_content(
+                    model=step["model"],
+                    contents=user_content,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        response_mime_type="application/json",
+                        temperature=0.4
+                    )
+                )
+                result = json.loads(response.text)
+                result["_engine_used"] = step["name"]
+                return result
+                
+            elif step["engine"] == "openai":
                 openai_response = openai_client.chat.completions.create(
-                    model=OPENAI_MODEL,
+                    model=step["model"],
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_content}
@@ -164,15 +168,23 @@ def call_llm_agent(system_prompt, user_content):
                     response_format={"type": "json_object"}
                 )
                 result = json.loads(openai_response.choices[0].message.content)
-                result["_engine_used"] = "ARMSB 0.4 CORE"
+                result["_engine_used"] = step["name"]
                 return result
                 
-            except Exception:
-                st.error("🚨 ARMSB Core: Both compute clusters saturated. Please wait 30 seconds.")
+        except Exception as e:
+            error_str = str(e).lower()
+            # If it's a traffic jam or quota error, proceed to the next step in the chain
+            if any(err in error_str for err in ["503", "unavailable", "429", "overloaded", "quota", "billing", "insufficient"]):
+                if i == len(chain) - 1:
+                    # All fallbacks exhausted
+                    st.error("🚨 ARMSB CORE : Error code 503. Clustered demand exceeded maximum thresholds. Please try again.")
+                    return None
+                else:
+                    continue
+            else:
+                # Completely different error (e.g. system interrupt)
+                st.error("🚨 ARMSB CORE : Internal system connection interrupted.")
                 return None
-        else:
-            st.error("🚨 ARMSB Core: Internal system connection interrupted.")
-            return None
 
 # -----------------------------------------
 # STREAMLIT UI
@@ -263,7 +275,7 @@ if st.button("Execute Intelligence Pipeline", type="primary"):
                         # THE SECRET TRACKER
                         st.divider()
                         engine_used = agent_3_output.get('_engine_used', 'Unknown')
-                        st.caption(f"⚙️ **ARMSB Diagnostics:** Pipeline executed via *{engine_used}*")
+                        st.caption(f"⚙️ **Diagnostics:** Pipeline executed via *{engine_used}*")
                     else:
                         status.update(label="Pipeline Execution Interrupted.", state="error", expanded=True)
                 else:
