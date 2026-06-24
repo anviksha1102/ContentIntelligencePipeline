@@ -80,11 +80,6 @@ You MUST output ONLY a valid JSON object with the following keys:
 2. "creator_angle": (How does this creator approach this? E.g., practical, strategy-driven, empathy + tough love)
 """
 
-You are completely right, I lost the high-fidelity constraints from your backup. I missed the explicit "Correct/Forbidden" verb examples, the `(MANDATORY)` tags, the expanded structure headers, and the specific prompt memory comment at the bottom. Those explicit examples are exactly why your earlier generations had much better grammatical alignment.
-
-Here is your exact backup restored, with the new `CRITICAL NAME RULE` seamlessly injected at the top. Replace your current function with this:
-
-```python
 def get_agent_2_prompt(creator_name, live_transcript=None):
     base_prompt = f"""
 You are the personal ghostwriter for '{creator_name}'. You will generate a LONG-FORM (5-minute) YouTube Video script based on the audience analysis.
