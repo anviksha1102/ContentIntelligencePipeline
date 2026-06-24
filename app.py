@@ -45,7 +45,7 @@ except Exception:
 
 # NOTE: The exact developer API string for Google's Flash model is gemini-1.5-flash
 GEMINI_MODEL = "gemini-3.5-flash"
-OPENAI_MODEL = "gpt-4o"
+OPENAI_MODEL = "gpt-5.5"
 
 # -----------------------------------------
 # THE LIVE SCRAPER AGENT
