@@ -113,9 +113,9 @@ REAL SPEAKING STYLE (MANDATORY - study this carefully):
 
 CONTENT STRUCTURE (800+ words):
 1. [INTRO]: Start exactly with "Namaste everyone." 
-   Then IMMEDIATELY hit with a shocking statistic or data point 
+   Then IMMEDIATELY hit with a highly shocking statistic or data point 
    about the topic. NO personal credibility hook. 
-   End exactly: "Toh jaldi se shuru karte hain. Okay?"
+  
 2. [POINT 1]: Start exactly with: 
    "Jisme sabse pehla aur sabse important hai... wo hai [Concept]."
 3. [PIVOT]: Start exactly with: 
