@@ -137,19 +137,17 @@ You MUST output ONLY a valid JSON object with the following keys:
 # MASKED DIAGNOSTIC ORCHESTRATOR FUNCTION 
 # -----------------------------------------
 def call_llm_agent(system_prompt, user_content):
-    # The Execution Chain
+    # The Execution Chain (One strike and you're out)
     chain = [
         {"engine": "google", "model": GEMINI_MODEL, "name": "ARMSB Logic Node v3.5", "msg": "Initializing..."},
-        {"engine": "google", "model": GEMINI_MODEL, "name": "ARMSB Logic Node v3.5 (Auto-Retry)", "msg": "Network congestion. Retrying primary node..."},
-        {"engine": "google", "model": "gemini-2.5-flash", "name": "ARMSB Logic Node v2.5", "msg": "Re-routing to secondary logic node..."},
-        {"engine": "openai", "model": OPENAI_MODEL, "name": "ARMSB Auxiliary Core 5.5", "msg": "Internal nodes saturated. Engaging external fallback..."}
+        {"engine": "openai", "model": OPENAI_MODEL, "name": "ARMSB Auxiliary Core 5.5", "msg": "Primary node busy. Engaging auxiliary fallback..."}
     ]
     
     for i, step in enumerate(chain):
-        # Trigger stealth toast for retries
+        # Trigger stealth toast for the fallback
         if i > 0:
             st.toast(f"⏳ ARMSB Core: {step['msg']}", icon="🔄")
-            time.sleep(2)
+            time.sleep(1)
             
         try:
             if step["engine"] == "google":
@@ -182,16 +180,16 @@ def call_llm_agent(system_prompt, user_content):
                 
         except Exception as e:
             error_str = str(e).lower()
-            # If it's a traffic jam or quota error, proceed to the next step in the chain
+            # If it's a traffic jam or quota error, proceed instantly to OpenAI
             if any(err in error_str for err in ["503", "unavailable", "429", "overloaded", "quota", "billing", "insufficient"]):
                 if i == len(chain) - 1:
-                    # All fallbacks exhausted
+                    # Both Google and OpenAI failed (extremely unlikely)
                     st.error("🚨 ARMSB CORE : Error code 503. Clustered demand exceeded maximum thresholds. Please try again.")
                     return None
                 else:
                     continue
             else:
-                # Completely different error (e.g. system interrupt)
+                # Completely different system error
                 st.error("🚨 ARMSB CORE : Internal system connection interrupted.")
                 return None
 
