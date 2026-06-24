@@ -127,9 +127,10 @@ You MUST output ONLY a valid JSON object with the following keys:
 """
 
 # -----------------------------------------
-# ORCHESTRATOR FUNCTION
+# ORCHESTRATOR FUNCTION (WITH GEMINI PRO FALLBACK)
 # -----------------------------------------
 def call_gemini_agent(system_prompt, user_content):
+    # ATTEMPT 1: Primary Node (Fast & Lean)
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
@@ -141,9 +142,35 @@ def call_gemini_agent(system_prompt, user_content):
             )
         )
         return json.loads(response.text)
+        
     except Exception as e:
-        st.error(f"API Error: {e}")
-        return None
+        error_msg = str(e)
+        
+        # Catch 503 (Unavailable) or 429 (Rate Limit) errors
+        if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "overloaded" in error_msg.lower():
+            # Silently notify the UI that the Hot-Swap is occurring
+            st.toast("⏳ Flash node overloaded. Hot-swapping to Gemini 2.5 Pro...", icon="🔄")
+            
+            # ATTEMPT 2: Fallback Node (Heavy Reasoning via Gemini 2.5 Pro)
+            try:
+                fallback_response = client.models.generate_content(
+                    model="gemini-2.5-pro",
+                    contents=user_content,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        response_mime_type="application/json",
+                        temperature=0.4
+                    )
+                )
+                return json.loads(fallback_response.text)
+                
+            except Exception as fallback_error:
+                st.error(f"CRITICAL: Both Unnao nodes failed. Error: {fallback_error}")
+                return None
+        else:
+            # If it's a completely different error (like a bad API key), print it
+            st.error(f"Core Engine Error: {error_msg}")
+            return None
 
 # -----------------------------------------
 # STREAMLIT UI
