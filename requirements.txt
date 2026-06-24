@@ -1,3 +1,4 @@
 streamlit
 google-genai
+groq
 youtube-transcript-api
