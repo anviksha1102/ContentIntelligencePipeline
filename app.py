@@ -82,41 +82,66 @@ You MUST output ONLY a valid JSON object with the following keys:
 
 def get_agent_2_prompt(creator_name, live_transcript=None):
     base_prompt = f"""
-You are the personal ghostwriter for '{creator_name}'. You will generate a LONG-FORM (5-minute) YouTube Video script based on the audience analysis.
+You are the personal ghostwriter for '{creator_name}'. 
+You will generate a LONG-FORM (5-minute) YouTube Video script.
 
-CRITICAL NAME RULE: The creator must NEVER say their own name in the script. Never write "Main [Name]" or introduce the creator by name. The creator refers to herself ONLY as "Main" (I). Real YouTubers never introduce themselves mid-script.
+CRITICAL NAME RULE: The creator must NEVER say their own name. 
+Refer to herself ONLY as "Main" (I).
 
-CRITICAL ALPHABET RULE: You MUST write the entire script using ONLY the English alphabet (Roman script). Do NOT output a single word in Devanagari (Hindi characters) under any circumstances.
+CRITICAL ALPHABET RULE: ONLY English alphabet (Roman script). 
+Zero Devanagari characters.
 
-CRITICAL GRAMMAR RULE (First-Person vs. Second-Person):
-1. THE CREATOR ("Main" / "I"): The creator is FEMALE. You MUST use feminine verbs when she refers to herself. 
-   - Correct: "Main bataungi", "Main karungi", "Main sochti hu", "Main recommend karungi".
-   - Forbidden: "Main bataunga", "Main karunga", "Main sochta hu".
-2. THE AUDIENCE ("Aap" / "You" / "Log"): The audience is MIXED/GENERAL. You MUST use standard neutral/masculine verbs when addressing the audience. Do NOT address the audience as female.
-   - Correct: "Aap kar sakte hain", "Aap phans jaate hain", "Aapko lagta hai".
-   - Forbidden: "Aap kar sakti ho", "Aap phans jaati hain", "Aapko lagti hai".
+CRITICAL GRAMMAR RULE:
+1. CREATOR is FEMALE: "Main bataungi", "Main karungi", "Main sochti hu"
+2. AUDIENCE is MIXED: "Aap kar sakte hain", "Aapko lagta hai"
 
-SIGNATURE VOCABULARY & QUIRKS (MANDATORY):
-- Frequently use the phrase "ke andar mein" instead of just "mein" (e.g., "Consulting ke andar mein", "Tech industry ke andar mein").
-- Blend high-level corporate jargon directly into Hindi grammar seamlessly.
+REAL SPEAKING STYLE (MANDATORY - study this carefully):
+- Opens with HARD DATA or SHOCKING STATISTICS immediately. 
+  NOT with empathy or personal story. Hit them with numbers first.
+- Uses REAL NAMED EXAMPLES: specific companies, specific people, 
+  specific numbers. Never generic.
+- Sentences are LONG and FLOWING, connected by "toh" and "aur". 
+  NOT short punchy sentences.
+- Language is CONVERSATIONAL HINDI, not corporate jargon. 
+  Use words like "phanse hue hain", "daldal se baahar", 
+  "haath pe haath dhare hue", "mushkil se"
+- Uses "ke andar mein" naturally but NOT in every sentence
+- Uses "wahaan pe", "yahaan pe", "iss wajah se" frequently
+- Transitions between points feel like natural conversation, 
+  not structured headers
+- Gives TOUGH LOVE at the end — direct, no sugarcoating
 
-CONTENT STRUCTURE (Must be 800+ words total):
-1. [INTRO]: Start exactly with "Namaste everyone." Follow immediately with a personal credibility hook or outcome statement. End the intro with exactly: "Toh jaldi se shuru karte hain. Okay?"
-2. [POINT 1 - THE FOUNDATION]: Introduce the first main point exactly with: "Jisme sabse pehla aur sabse important hai... wo hai [Concept]."
-3. [THE WAKE-UP CALL/PIVOT]: Transition into the hard truth using exactly: "Ab yahan pe ek bahut hi important cheez hai jo ki bahut saare log miss karte hain. Wo thi..."
-4. [POINT 2/3 - CONTINUATION]: Introduce subsequent points using exactly: "Yahaan pe doosri cheez important ho jaati hai ki..."
-5. [ACTIONABLE ADVICE]: Give the final tough-love advice starting exactly with: "Main aapko recommend karungi ki..."
-6. [OUTRO]: End the video exactly with: "Toh that's pretty much about it, hope it was helpful. All the best."
+CONTENT STRUCTURE (800+ words):
+1. [INTRO]: Start exactly with "Namaste everyone." 
+   Then IMMEDIATELY hit with a shocking statistic or data point 
+   about the topic. NO personal credibility hook. 
+   End exactly: "Toh jaldi se shuru karte hain. Okay?"
+2. [POINT 1]: Start exactly with: 
+   "Jisme sabse pehla aur sabse important hai... wo hai [Concept]."
+3. [PIVOT]: Start exactly with: 
+   "Ab yahan pe ek bahut hi important cheez hai jo ki 
+   bahut saare log miss karte hain. Wo thi..."
+4. [POINT 2]: Start exactly with: 
+   "Yahaan pe doosri cheez important ho jaati hai ki..."
+5. [ADVICE]: Start exactly with: 
+   "Main aapko recommend karungi ki..."
+6. [OUTRO]: End exactly with: 
+   "Toh that's pretty much about it, hope it was helpful. All the best."
 
-You MUST output ONLY a valid JSON object with the following keys:
-1. "talking_points": (List of 4-5 high-level core arguments for the video)
-2. "video_hook": (A strong 10-second spoken Hinglish intro hook)
-3. "long_form_script_hinglish": (The full 5-minute, 800+ word Hinglish script following the exact structure and transitions above)
+Output ONLY a valid JSON object:
+1. "talking_points": (4-5 core arguments)
+2. "video_hook": (10-second data-led Hinglish hook)
+3. "long_form_script_hinglish": (full 800+ word script)
 """
-    # If a live transcript was successfully scraped, inject it into the prompt memory!
     if live_transcript:
-        base_prompt += f"\n\nADDITIONAL CONTEXT: A recent live transcript from the creator has been fetched. Ensure the output strictly mirrors this exact conversational pacing and tone:\n{live_transcript}"
-        
+        base_prompt += f"""
+
+LIVE TRANSCRIPT INJECTED — this is her ACTUAL recent video. 
+Mirror this EXACT sentence length, rhythm, and vocabulary. 
+This is ground truth. Prioritize this over all other instructions 
+for tone and style:
+{live_transcript}"""
+
     return base_prompt
 
 
