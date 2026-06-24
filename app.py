@@ -119,7 +119,6 @@ You MUST output ONLY a valid JSON object with the following keys:
         
     return base_prompt
 
-```
 
 AGENT_3_PROMPT = """
 You are a Growth Optimizer. You will generate the metadata and distribution strategy.
